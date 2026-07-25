@@ -1,0 +1,131 @@
+/* 
+Laboratorio Electronica Digital 2
+Fabiola Caballeros 24927
+Laboratorio 2: ISR y timers
+*/
+
+/*Librerias*/
+#include <Arduino.h>
+#include <stdio.h>
+#include <stdint.h>
+
+/*Definiciones*/
+#define B1 34
+#define B2 35
+//#define B3 27;
+
+#define L1 32 //leds contador timer
+#define L2 33
+#define L3 25
+#define L4 26
+
+#define L5 23 //leds contador boton
+#define L6 22
+#define L7 1
+#define L8 3
+
+#define L9 21 //led de alarma
+
+/*Prototipos de funciones*/
+void configTimer(void);
+void IRAM_ATTR B1_incremento_ISR();
+void IRAM_ATTR B2_decremento_ISR();
+
+/*Variables globales*/
+volatile int contador = 0;
+
+volatile uint32_t t1 = 0;
+volatile uint32_t t2 = 0;
+
+const int contadorbinario[16][4]={
+{LOW,LOW,LOW,LOW}, //0
+{LOW,LOW,LOW,HIGH}, //1
+{LOW,LOW,HIGH,LOW}, //2
+{LOW,LOW,HIGH,HIGH}, //3
+{LOW,HIGH,LOW,LOW}, //4
+{LOW,HIGH,LOW,HIGH}, //5
+{LOW,HIGH,HIGH,LOW}, //6
+{LOW,HIGH,HIGH,HIGH}, //7
+{HIGH,LOW,LOW,LOW}, //8
+{HIGH,LOW,LOW,HIGH}, //9
+{HIGH,LOW,HIGH,LOW}, //10
+{HIGH,LOW,HIGH,HIGH}, //11
+{HIGH,HIGH,LOW,LOW}, //12
+{HIGH,HIGH,LOW,HIGH}, //13
+{HIGH,HIGH,HIGH,LOW}, //14
+{HIGH,HIGH,HIGH,HIGH}, //15
+};
+
+hw_timer_t *TimerA = NULL;
+
+/*ISRs rutinas de interrupcion*/
+
+void IRAM_ATTR B1_incremento_ISR(){
+  if(millis()-t1>50){
+    contador++;
+
+    if(contador>15){
+      contador=0;
+    }
+    t1=millis();
+  }
+}
+
+void IRAM_ATTR B2_decremento_ISR(){
+  if(millis()-t2>50){
+    contador--;
+
+    if(contador<0){
+      contador=15;
+    }
+    t2=millis();
+  }
+}
+
+
+/*Funcion principal*/
+void setup(){
+
+pinMode(B1,INPUT_PULLDOWN);
+pinMode(B2,INPUT_PULLDOWN);
+//pinMode(B3, INPUT_PULLDOWN);
+
+pinMode(L1,OUTPUT);
+pinMode(L2,OUTPUT);
+pinMode(L3,OUTPUT);
+pinMode(L4,OUTPUT);
+pinMode(L5,OUTPUT);
+pinMode(L6,OUTPUT);
+pinMode(L7,OUTPUT);
+pinMode(L8,OUTPUT);
+pinMode(L9,OUTPUT);
+
+attachInterrupt(digitalPinToInterrupt(B1), B1_incremento_ISR, RISING);
+attachInterrupt(digitalPinToInterrupt(B2), B2_decremento_ISR, RISING);
+
+//configTimer();
+
+}
+
+void loop(){
+
+const int leds[4]={L1,L2,L3,L4}; 
+
+for (int i = 0; i < 4; i++) {
+  digitalWrite(leds[i], contadorbinario[contador][i]); 
+}
+
+}
+
+/*
+void configTimer(void){
+
+  timerA = timerBegin(0, 800, true);
+ 
+  timerAttachInterrupt(timerA, &TimerISR, true);
+  
+  timerAlarmWrite(timerA, alarma, true);
+  
+  timerAlarmEnable(timerA);
+}
+*/
