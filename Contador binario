@@ -56,26 +56,26 @@ const int contadorbinario[16][4]={
 {HIGH,HIGH,HIGH,HIGH}, //15
 };
 
-hw_timer_t *TimerA = NULL;
+//hw_timer_t *TimerA = NULL;
 
 /*ISRs rutinas de interrupcion*/
 
 void IRAM_ATTR B1_incremento_ISR(){
-  if(millis()-t1>50){
-    contador++;
+  if((millis()-t1)>100){ //antirrebote que calcula el tiempo que pasó desde la última pulsación
+    contador++; //incrementa
 
-    if(contador>15){
+    if(contador>15){ //limite max
       contador=0;
     }
-    t1=millis();
+    t1=millis(); //guarda pulsacion
   }
 }
 
 void IRAM_ATTR B2_decremento_ISR(){
-  if(millis()-t2>50){
-    contador--;
+  if((millis()-t2)>100){
+    contador--; //decrementa
 
-    if(contador<0){
+    if(contador<0){ //limite min
       contador=15;
     }
     t2=millis();
@@ -116,16 +116,3 @@ for (int i = 0; i < 4; i++) {
 }
 
 }
-
-/*
-void configTimer(void){
-
-  timerA = timerBegin(0, 800, true);
- 
-  timerAttachInterrupt(timerA, &TimerISR, true);
-  
-  timerAlarmWrite(timerA, alarma, true);
-  
-  timerAlarmEnable(timerA);
-}
-*/
