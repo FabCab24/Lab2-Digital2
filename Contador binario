@@ -10,16 +10,19 @@ Laboratorio 2: ISR y timers
 #include <stdint.h>
 
 /*Definiciones*/
+
+#define alarma 25000
+
 #define B1 34
 #define B2 35
-//#define B3 27;
+//#define B3 27
 
-#define L1 32 //leds contador timer
+#define L1 32 //leds manual
 #define L2 33
 #define L3 25
 #define L4 26
 
-#define L5 23 //leds contador boton
+#define L5 23 //leds automatico
 #define L6 22
 #define L7 1
 #define L8 3
@@ -28,14 +31,22 @@ Laboratorio 2: ISR y timers
 
 /*Prototipos de funciones*/
 void configTimer(void);
-void IRAM_ATTR B1_incremento_ISR();
+void IRAM_ATTR B1_incremento_ISR(); //funciones de interrupciones de boton
 void IRAM_ATTR B2_decremento_ISR();
 
+void IRAM_ATTR timerA_ISR(); //funcion de timer
+
 /*Variables globales*/
-volatile int contador = 0;
+volatile uint8_t contador = 0;
+volatile uint8_t contadorAuto = 0;
 
 volatile uint32_t t1 = 0;
 volatile uint32_t t2 = 0;
+
+hw_timer_t *timerA = NULL;
+
+const int ledsManual[4]={L1,L2,L3,L4}; 
+const int ledsAuto[4]={L5,L6,L7,L8};
 
 const int contadorbinario[16][4]={
 {LOW,LOW,LOW,LOW}, //0
@@ -56,7 +67,6 @@ const int contadorbinario[16][4]={
 {HIGH,HIGH,HIGH,HIGH}, //15
 };
 
-//hw_timer_t *TimerA = NULL;
 
 /*ISRs rutinas de interrupcion*/
 
@@ -82,6 +92,14 @@ void IRAM_ATTR B2_decremento_ISR(){
   }
 }
 
+void IRAM_ATTR timerA_ISR(){
+  contadorAuto++; //incrementa el contador de manera automatica
+
+  if(contadorAuto > 15){ //limites del contador circular
+    contadorAuto = 0;
+  }
+
+}
 
 /*Funcion principal*/
 void setup(){
@@ -103,16 +121,31 @@ pinMode(L9,OUTPUT);
 attachInterrupt(digitalPinToInterrupt(B1), B1_incremento_ISR, RISING);
 attachInterrupt(digitalPinToInterrupt(B2), B2_decremento_ISR, RISING);
 
-//configTimer();
+configTimer();
 
 }
 
 void loop(){
 
-const int leds[4]={L1,L2,L3,L4}; 
-
 for (int i = 0; i < 4; i++) {
-  digitalWrite(leds[i], contadorbinario[contador][i]); 
+  digitalWrite(ledsManual[i], contadorbinario[contador][i]); 
+}
+
+for(int i=0;i<4;i++){
+    digitalWrite(ledsAuto[i], contadorbinario[contadorAuto][i]);
 }
 
 }
+
+
+void configTimer(void){
+
+  timerA = timerBegin(0, 800, true);
+ 
+  timerAttachInterrupt(timerA, &timerA_ISR, true);
+  
+  timerAlarmWrite(timerA, alarma, true);
+  
+  timerAlarmEnable(timerA);
+}
+
