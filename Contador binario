@@ -16,7 +16,7 @@ Laboratorio 2: ISR y timers
 
 #define B1 35
 #define B2 34
-//#define B3 27
+#define B3 32
 
 #define L1 13 //leds manual
 #define L2 14
@@ -110,7 +110,7 @@ void setup(){
 
 pinMode(B1,INPUT_PULLDOWN);
 pinMode(B2,INPUT_PULLDOWN);
-//pinMode(B3, INPUT_PULLDOWN);
+pinMode(B3, INPUT_PULLDOWN);
 
 pinMode(L1,OUTPUT);
 pinMode(L2,OUTPUT);
@@ -153,7 +153,6 @@ if(contador == contadorAuto){
 
     digitalWrite(L9, alarma); //actualiza el estado de la alarma
 
-  
     contadorAuto = 0;
     comparador = 1;
   }
@@ -163,11 +162,17 @@ else{
   comparador = 0;
 }
 
+if(digitalRead(B3)==HIGH){
+  contadorAuto = 0;
+
+  while(digitalRead(B3)==HIGH); //mientras el sensor siga activado se mantiene el estado
+}
+/*
 if(touchRead(B3) < umbral){  //lee el sensor
     contadorAuto = 0;  //reinicia contador automatico
 
     while(touchRead(B3) < umbral);  //mientras el sensor siga activado se mantiene el estado
-}
+}*/
 }
 
 void configTimer(void){
