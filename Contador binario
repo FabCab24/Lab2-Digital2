@@ -11,23 +11,23 @@ Laboratorio 2: ISR y timers
 
 /*Definiciones*/
 
-#define alarma 25000
+#define tiempo 25000
 
-#define B1 34
-#define B2 35
+#define B1 35
+#define B2 34
 //#define B3 27
 
-#define L1 32 //leds manual
-#define L2 33
-#define L3 25
-#define L4 26
+#define L1 13 //leds manual
+#define L2 14
+#define L3 26
+#define L4 33
 
-#define L5 23 //leds automatico
-#define L6 22
-#define L7 1
-#define L8 3
+#define L5 15 //leds automatico
+#define L6 2
+#define L7 4
+#define L8 16
 
-#define L9 21 //led de alarma
+#define L9 23 //led de alarma
 
 /*Prototipos de funciones*/
 void configTimer(void);
@@ -37,8 +37,11 @@ void IRAM_ATTR B2_decremento_ISR();
 void IRAM_ATTR timerA_ISR(); //funcion de timer
 
 /*Variables globales*/
-volatile uint8_t contador = 0;
+volatile uint8_t contador = 0; //contadores empiezan en 0
 volatile uint8_t contadorAuto = 0;
+
+volatile uint8_t alarma = LOW; //estado de la alarma
+uint8_t comparador = 0; //detecta si los contadores coinciden
 
 volatile uint32_t t1 = 0;
 volatile uint32_t t2 = 0;
@@ -73,7 +76,7 @@ const int contadorbinario[16][4]={
 void IRAM_ATTR B1_incremento_ISR(){
   if((millis()-t1)>100){ //antirrebote que calcula el tiempo que pasó desde la última pulsación
     contador++; //incrementa
-
+    
     if(contador>15){ //limite max
       contador=0;
     }
@@ -135,6 +138,30 @@ for(int i=0;i<4;i++){
     digitalWrite(ledsAuto[i], contadorbinario[contadorAuto][i]);
 }
 
+// comparacion de contadores
+if(contador == contadorAuto){
+
+  if(comparador == 0){
+
+    if(alarma == LOW){ //intermitencia del led cuando hay coincidencia
+      alarma = HIGH;
+    }
+    else{
+      alarma = LOW;
+    }
+
+    digitalWrite(L9, alarma); //actualiza el estado de la alarma
+
+  
+    contadorAuto = 0;
+    comparador = 1;
+  }
+}
+
+else{
+  comparador = 0;
+}
+
 }
 
 
@@ -144,8 +171,7 @@ void configTimer(void){
  
   timerAttachInterrupt(timerA, &timerA_ISR, true);
   
-  timerAlarmWrite(timerA, alarma, true);
+  timerAlarmWrite(timerA, tiempo, true);
   
   timerAlarmEnable(timerA);
 }
-
