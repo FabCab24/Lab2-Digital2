@@ -12,6 +12,7 @@ Laboratorio 2: ISR y timers
 /*Definiciones*/
 
 #define tiempo 25000
+#define umbral 30
 
 #define B1 35
 #define B2 34
@@ -162,8 +163,12 @@ else{
   comparador = 0;
 }
 
-}
+if(touchRead(B3) < umbral){  //lee el sensor
+    contadorAuto = 0;  //reinicia contador automatico
 
+    while(touchRead(B3) < umbral);  //mientras el sensor siga activado se mantiene el estado
+}
+}
 
 void configTimer(void){
 
