@@ -47,6 +47,8 @@ uint8_t comparador = 0; //detecta si los contadores coinciden
 volatile uint32_t t1 = 0;
 volatile uint32_t t2 = 0;
 
+uint8_t estadoB3 = B3;
+
 hw_timer_t *timerA = NULL;
 
 const int ledsManual[4]={L1,L2,L3,L4}; 
@@ -162,17 +164,12 @@ else{
   comparador = 0;
 }
 
-if(digitalRead(B3)==HIGH){
+//Simulación de sensor capacitivo
+if(digitalRead(B3)==HIGH && estadoB3==LOW){
   contadorAuto = 0;
-
-  while(digitalRead(B3)==HIGH); //mientras el sensor siga activado se mantiene el estado
 }
-/*
-if(touchRead(B3) < umbral){  //lee el sensor
-    contadorAuto = 0;  //reinicia contador automatico
+estadoB3 = digitalRead(B3);
 
-    while(touchRead(B3) < umbral);  //mientras el sensor siga activado se mantiene el estado
-}*/
 }
 
 void configTimer(void){
