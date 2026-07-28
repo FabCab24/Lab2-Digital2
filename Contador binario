@@ -12,7 +12,7 @@ Laboratorio 2: ISR y timers
 /*Definiciones*/
 
 #define tiempo 25000
-#define umbral 30
+#define umbral 40
 
 #define B1 35
 #define B2 34
@@ -111,7 +111,7 @@ void setup(){
 
 pinMode(B1,INPUT_PULLDOWN);
 pinMode(B2,INPUT_PULLDOWN);
-pinMode(B3, INPUT_PULLDOWN);
+//pinMode(B3, INPUT);
 
 pinMode(L1,OUTPUT);
 pinMode(L2,OUTPUT);
@@ -164,12 +164,10 @@ else{
 }
 
 //Simulación de sensor capacitivo
-if(digitalRead(B3) == HIGH){
-    contadorAuto = 0;
+if(touchRead(B3) < umbral){
+    contadorAuto = 0; 
 }
-
 }
-
 void configTimer(void){
 
   timerA = timerBegin(0, 800, true);
