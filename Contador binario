@@ -47,8 +47,6 @@ uint8_t comparador = 0; //detecta si los contadores coinciden
 volatile uint32_t t1 = 0;
 volatile uint32_t t2 = 0;
 
-uint8_t estadoB3 = B3;
-
 hw_timer_t *timerA = NULL;
 
 const int ledsManual[4]={L1,L2,L3,L4}; 
@@ -77,7 +75,7 @@ const int contadorbinario[16][4]={
 /*ISRs rutinas de interrupcion*/
 
 void IRAM_ATTR B1_incremento_ISR(){
-  if((millis()-t1)>100){ //antirrebote que calcula el tiempo que pasó desde la última pulsación
+  if((millis()-t1)>200){ //antirrebote que calcula el tiempo que pasó desde la última pulsación
     contador++; //incrementa
     
     if(contador>15){ //limite max
@@ -88,11 +86,12 @@ void IRAM_ATTR B1_incremento_ISR(){
 }
 
 void IRAM_ATTR B2_decremento_ISR(){
-  if((millis()-t2)>100){
-    contador--; //decrementa
-
-    if(contador<0){ //limite min
-      contador=15;
+  if((millis()-t2)>200){
+    if(contador == 0){
+      contador = 15;
+    }
+    else{
+      contador--;
     }
     t2=millis();
   }
@@ -124,8 +123,8 @@ pinMode(L7,OUTPUT);
 pinMode(L8,OUTPUT);
 pinMode(L9,OUTPUT);
 
-attachInterrupt(digitalPinToInterrupt(B1), B1_incremento_ISR, RISING);
-attachInterrupt(digitalPinToInterrupt(B2), B2_decremento_ISR, RISING);
+attachInterrupt(digitalPinToInterrupt(B1), B1_incremento_ISR, FALLING);
+attachInterrupt(digitalPinToInterrupt(B2), B2_decremento_ISR, FALLING);
 
 configTimer();
 
@@ -165,10 +164,9 @@ else{
 }
 
 //Simulación de sensor capacitivo
-if(digitalRead(B3)==HIGH && estadoB3==LOW){
-  contadorAuto = 0;
+if(digitalRead(B3) == HIGH){
+    contadorAuto = 0;
 }
-estadoB3 = digitalRead(B3);
 
 }
 
